@@ -29,26 +29,25 @@ const SHOULD_SPEAK = false;
 const SPEAK_PAUSE_TIME_MS = 1500;
 const COLS = 3;
 const ROWS = 20;
-const sets = [NOTES_NO_FLATS, MAJOR_INTERVALS].map(set => set.split(' '))
+const sets = [NOTES_NO_FLATS, MAJOR_INTERVALS].map((set) => set.split(' '));
 
 // random from each
-
 let prevRow = [];
 let strsToSpeak = [];
 for (let i = 0; i < ROWS; i++) {
   process.stdout.write(boldenText(`${i + 1}) `));
   process.stdout.write(COLOR_CODES[i % COLOR_CODES.length]);
-  const row = []
-    for (let j = 0; j < COLS; j++) {
-      const col = []
-      for (let setIndex = 0; setIndex < sets.length; setIndex++) {
-        const currentSet = sets[setIndex];
-        const index = Math.floor(Math.random() * currentSet.length);
-        const selectedValue = currentSet[index];
-        col.push(selectedValue);
-      }
-      row.push(col.join(' '));
+  const row = [];
+  for (let j = 0; j < COLS; j++) {
+    const col = [];
+    for (let setIndex = 0; setIndex < sets.length; setIndex++) {
+      const currentSet = sets[setIndex];
+      const index = Math.floor(Math.random() * currentSet.length);
+      const selectedValue = currentSet[index];
+      col.push(selectedValue);
     }
+    row.push(col.join(' '));
+  }
 
   process.stdout.write(row.join(', '));
   process.stdout.write(`${RESET_CODE}\n\n`);
