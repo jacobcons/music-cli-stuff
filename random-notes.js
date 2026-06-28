@@ -4,20 +4,24 @@ import { stdin as input, stdout as output } from 'node:process';
 
 // specify intervals 135, specify length of sequence
 // CONSTANTS
-const ROOT_RANGE = ['A3', 'A4'];
+const ROOT_RANGE = ['D3', 'D4'];
 const AVAILABLE_SCALE_DEGREES = ['1', '3', '5'];
+const SCALE_DEGREE_OCTAVE_RANGE = 0;
 const LENGTH = 3;
 const DURATION = 350;
 const DELAY = 1000;
+const NOTE_VOLUME = 100;
+const DRONE_VOLUME = 50;
 
 let rootRange = ROOT_RANGE.map((note) => new Note(note).number);
 const rl = createInterface({ input, output });
 await WebMidi.enable();
 const OUTPUT = WebMidi.outputs[0];
-const INPUT = WebMidi.inputs[0];
 const MAIN = OUTPUT.channels[1];
 const DRONE = OUTPUT.channels[2];
+MAIN.sendControlChange('volumecoarse', NOTE_VOLUME);
 DRONE.sendProgramChange(48);
+DRONE.sendControlChange('volumecoarse', DRONE_VOLUME);
 
 // helpers
 const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -36,8 +40,14 @@ const SCALE_DEGREES = [
   'b7',
   '7',
 ];
-const mapScaleDegreeToNote = (root, scaleDegree) =>
-  new Note(root.getOffsetNumber(undefined, SCALE_DEGREES.indexOf(scaleDegree)));
+const mapScaleDegreeToNote = (root, scaleDegree) => {
+  const octaveOffset =
+    Math.floor(Math.random() * 2 * SCALE_DEGREE_OCTAVE_RANGE) +
+    SCALE_DEGREE_OCTAVE_RANGE;
+  return new Note(
+    root.getOffsetNumber(octaveOffset, SCALE_DEGREES.indexOf(scaleDegree)),
+  );
+};
 
 const playNotes = (notes) => {
   const time = WebMidi.time;
@@ -45,7 +55,6 @@ const playNotes = (notes) => {
     MAIN.playNote(notes[i], {
       duration: DURATION,
       time: time + DURATION * i + DELAY,
-      attack: 1,
     });
   }
 };
@@ -105,15 +114,11 @@ const displayMenuWhenMusicIsFinished = () => {
 };
 
 const startDrone = (root) => {
-  DRONE.playNote(root, {
-    attack: 0.25,
-  });
+  DRONE.playNote(root);
 };
 
 const stopDrone = (root) => {
-  DRONE.stopNote(root, {
-    attack: 0.25,
-  });
+  DRONE.stopNote(root);
 };
 
 // generate random notes => play notes => display menu of options when it's done
